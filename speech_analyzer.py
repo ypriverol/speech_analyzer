@@ -13,6 +13,7 @@ from plotly.offline.offline import matplotlib
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import pandas as pd
+from models import constants
 
 from nltk.corpus import stopwords
 
@@ -110,9 +111,9 @@ def generate_speeches_per_year(speeches):
    plt.title("Fidel's Speech Per Year")
 
    plt.xticks(x_pos, x)
-   plt.setp(plt.gca().get_xticklabels(), rotation=45, horizontalalignment='right')
-   matplotlib.rc('xtick', labelsize=5)
    plt.tick_params(top='off', bottom='off', left='off', right='off', labelleft='off', labelbottom='on')
+   plt.setp(plt.gca().get_xticklabels(), rotation=90, horizontalalignment='right')
+   matplotlib.rc('xtick', labelsize=5)
    plt.show()
 
 
@@ -171,8 +172,8 @@ def compute_word_count(text, number_words, year):
         print(word, ": ", count)
     lst = word_counter.most_common(number_words)
     df = pd.DataFrame(lst, columns=['Word', 'Count'])
-    df.plot.bar(x='Word', y='Count')
-
+    df.plot.bar(x='Word', y='Count',  title='More frequently words in -- ' + year)
+    plt.savefig('output/frecuently-words-'+str(year) + ".png")
 
 def most_common_words_per_year(speeches, number_words):
     word_count = defaultdict(list)
