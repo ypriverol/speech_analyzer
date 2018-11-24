@@ -1,0 +1,13 @@
+Current directory is
+/Users/yperez/IdeaProjects/github-repo/ypriverol/cuba/analysis-speech/data/2007/
+esp/f101007e_archivos
+
+    drwxr-xr-x  111 yperez   staff       3552 Nov 23 23:37 [1]../
+    -rw-r--r--    1 yperez   staff        162 Jan 14  2009 [2]filelist.xml
+    -rw-r--r--    1 yperez   staff          0 Jan 14  2009 [3]header.html
+
+References
+
+   1. file:///Users/yperez/IdeaProjects/github-repo/ypriverol/cuba/analysis-speech/data/2007/esp
+   2. file:///Users/yperez/IdeaProjects/github-repo/ypriverol/cuba/analysis-speech/data/2007/esp/f101007e_archivos/filelist.xml
+   3. file:///Users/yperez/IdeaProjects/github-repo/ypriverol/cuba/analysis-speech/data/2007/esp/f101007e_archivos/header.html
