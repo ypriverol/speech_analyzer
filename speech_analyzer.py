@@ -13,14 +13,15 @@ from plotly.offline.offline import matplotlib
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import pandas as pd
-from models import constants
 
 from nltk.corpus import stopwords
+
+from models.constants import get_stop_words
+from models.utils import get_clean_word_list
 
 plt.style.use('ggplot')
 
 import codecs, sys
-
 
 from nltk.stem.wordnet import WordNetLemmatizer
 import html2text
@@ -93,28 +94,26 @@ for president in sorted(speeches.keys()):
 
     num_unique_lemmas[president] = len(lemmas)
     print('%d "%s" %d %d %f %d %d' % (
-    year, name, num_sentences[president], num_words[president], avg_sentence_len[president],
-    num_unique_words[president], num_unique_lemmas[president]))
+        year, name, num_sentences[president], num_words[president], avg_sentence_len[president],
+        num_unique_words[president], num_unique_lemmas[president]))
 
 
 def generate_speeches_per_year(speeches):
-   x = []
-   y = []
-   for key in sorted(speeches.items()):
-       value = len(key[1])
-       x.append(key[0])
-       y.append(value)
-   x_pos = [i for i, _ in enumerate(x)]
-   plt.bar(x_pos, y, color='green')
-   plt.xlabel("Year")
-   plt.ylabel("Number of Speeches")
-   plt.title("Fidel's Speech Per Year")
+    x = []
+    y = []
+    for key in sorted(speeches.items()):
+        value = len(key[1])
+        x.append(key[0])
+        y.append(value)
+    x_pos = [i for i, _ in enumerate(x)]
+    plt.bar(x_pos, y, color='green')
+    plt.xlabel("Year")
+    plt.ylabel("Number of Speeches")
+    plt.title("Fidel's Speech Per Year")
 
-   plt.xticks(x_pos, x)
-   plt.tick_params(top='off', bottom='off', left='off', right='off', labelleft='off', labelbottom='on')
-   plt.setp(plt.gca().get_xticklabels(), rotation=90, horizontalalignment='right')
-   matplotlib.rc('xtick', labelsize=5)
-   plt.show()
+    plt.xticks(x_pos, x)
+    plt.setp(plt.gca().get_xticklabels(), rotation=90, horizontalalignment='right')
+    plt.savefig('output/number-speeches-per-year.png')
 
 
 def generate_world_cloud(speeches):
@@ -145,35 +144,31 @@ def generate_world_cloud(speeches):
 
 def compute_word_count(text, number_words, year):
     stop_words = stopwords.words('spanish')
-    for word in stop_words:
-        text = text.replace(" " + word + " ", " ")
+    for word in get_stop_words():
+        stop_words.append(word)
+
     wordcount = {}
     # To eliminate duplicates, remember to split by punctuation, and use case demiliters.
-    for word in text.lower().split():
-        word = word.replace(".", "")
-        word = word.replace(",", "")
-        word = word.replace(":", "")
-        word = word.replace("\"", "")
-        word = word.replace("!", "")
-        word = word.replace("â€œ", "")
-        word = word.replace("â€˜", "")
-        word = word.replace("*", "")
-        if word not in stop_words:
-            if word not in wordcount:
-                wordcount[word] = 1
-            else:
-                wordcount[word] += 1
+    word_list = get_clean_word_list(text)
+    for word in word_list:
+        if word not in wordcount:
+            wordcount[word] = 1
+        else:
+            wordcount[word] += 1
 
     print("\nOK. The {} most common words in " + year + " are as follows\n".format(number_words))
     word_counter = collections.Counter(wordcount)
 
     for word, count in word_counter.most_common(number_words):
-        # word = word.encode('utf8')
         print(word, ": ", count)
+
     lst = word_counter.most_common(number_words)
+    new_style = {'grid': False}
+    matplotlib.rc('axes', **new_style)
     df = pd.DataFrame(lst, columns=['Word', 'Count'])
-    df.plot.bar(x='Word', y='Count',  title='More frequently words in -- ' + year)
-    plt.savefig('output/frecuently-words-'+str(year) + ".png")
+    df.plot.bar(x='Word', y='Count', title='More frequently words in -- ' + year)
+    plt.savefig('output/frequently-words-' + str(year) + ".png")
+
 
 def most_common_words_per_year(speeches, number_words):
     word_count = defaultdict(list)
@@ -200,8 +195,8 @@ def main():
         print(str(key) + " : " + str(len(speeches[key])))
 
     generate_speeches_per_year(speeches)
-    
-    most_common_words_per_year(speeches,50)
+
+    most_common_words_per_year(speeches, 50)
 
     generate_world_cloud(speeches)
 
