@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+import tweepy  # https://github.com/tweepy/tweepy
+import csv
+
+# Twitter API credentials
+from twitter_crawler.constants import PRESIDENTS
+
+consumer_token = "Q3EsjwXyQIvD4D1m90qKNk48r"
+consumer_secret = "AWo6hcWQF6maHPQDNMrhln31cbkdGKHpMvLW3BxO7xdQwVxTgA"
+access_token = "36059597-qLyr7lrQXYr2euHHKqHDQsAkrYPPW07Hmrk6izysh"
+access_secret = "wD1mXtdZSdDt1fJ0XiDn0bz8BnDyUSG81eScxQyfueyEL"
+
+
+def get_all_tweets(screen_name, country):
+    # Twitter only allows access to a users most recent 3240 tweets with this method
+    print ("Reading tweets from: " + screen_name)
+    # authorize twitter, initialize tweepy
+    auth = tweepy.OAuthHandler(consumer_token, consumer_secret)
+    auth.set_access_token(access_token, access_secret)
+    api = tweepy.API(auth)
+
+    # initialize a list to hold all the tweepy Tweets
+    alltweets = []
+
+    # make initial request for most recent tweets (200 is the maximum allowed count)
+    new_tweets = api.user_timeline(screen_name=screen_name, count=200)
+
+    # save most recent tweets
+    alltweets.extend(new_tweets)
+
+    # save the id of the oldest tweet less one
+    oldest = alltweets[-1].id - 1
+
+    # keep grabbing tweets until there are no tweets left to grab
+    while len(new_tweets) > 0:
+        print
+        "getting tweets before %s" % (oldest)
+
+        # all subsiquent requests use the max_id param to prevent duplicates
+        new_tweets = api.user_timeline(screen_name=screen_name, count=200, max_id=oldest)
+
+        # save most recent tweets
+        alltweets.extend(new_tweets)
+
+        # update the id of the oldest tweet less one
+        oldest = alltweets[-1].id - 1
+
+        print
+        "...%s tweets downloaded so far" % (len(alltweets))
+
+    # transform the tweepy tweets into a 2D array that will populate the csv
+    outtweets = [[country, tweet.id_str, tweet.created_at, tweet.text.encode("ISO-8859-1", 'ignore').decode("ISO-8859-1", 'ignore')] for tweet in alltweets]
+
+    # write the csv
+    with open('../data/presidents/%s_%s_tweets.csv' % (screen_name,country), 'wt') as f:
+        writer = csv.writer(f)
+        writer.writerows(outtweets)
+
+    pass
+
+
+if __name__ == '__main__':
+    # pass in the username of the account you want to download
+    for account in PRESIDENTS:
+        get_all_tweets(account['account'], account['country'])

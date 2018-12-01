@@ -18,6 +18,7 @@ from nltk.corpus import stopwords
 
 from models.constants import get_stop_words
 from models.utils import get_clean_word_list
+from nltk.tokenize import sent_tokenize
 
 plt.style.use('ggplot')
 
@@ -119,27 +120,28 @@ def generate_speeches_per_year(speeches):
 def generate_world_cloud(speeches):
     # Generate a word cloud image
     stop_words = stopwords.words('spanish')
-    text = ""
+    for word in get_stop_words():
+        stop_words.append(word)
+
+    tolal_text = ""
     for key in speeches:
-        for value in speeches[key]:
-            text = text + value
+        for speech in speeches[key]:
+            tolal_text = tolal_text + " " + speech
 
-    for word in stop_words:
-        text = text.replace(" " + word + " ", " ")
+    words = get_clean_word_list(tolal_text)
+    tolal_text = ""
+    for word in words:
+        tolal_text = tolal_text + " " + word
 
-    wordcloud = WordCloud().generate(text)
-
-    # Display the generated image:
-    # the matplotlib way:
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis("off")
+    # for word in stop_words:
+    #     text = text.replace(" " + word + " ", " ")
 
     # lower max_font_size
-    wordcloud = WordCloud(max_font_size=40).generate(text)
+    wordcloud = WordCloud(max_font_size=40).generate(tolal_text)
     plt.figure()
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
-    plt.show()
+    plt.savefig('output/wolrdcloud.png')
 
 
 def compute_word_count(text, number_words, year):
@@ -166,7 +168,7 @@ def compute_word_count(text, number_words, year):
     new_style = {'grid': False}
     matplotlib.rc('axes', **new_style)
     df = pd.DataFrame(lst, columns=['Word', 'Count'])
-    df.plot.bar(x='Word', y='Count', title='More frequently words in -- ' + year)
+    df.plot.barh(x='Word', y='Count', title='More frequently words in -- ' + year, alpha=0.5, fontsize=8)
     plt.savefig('output/frequently-words-' + str(year) + ".png")
 
 
@@ -179,9 +181,20 @@ def most_common_words_per_year(speeches, number_words):
         word_count[key] = compute_word_count(speech, number_words, key)
 
 
+def tokanizer_speeches(speeches):
+
+    total_text = ""
+    for key in speeches:
+        for text in speeches[key]:
+            total_text = total_text + " " + text
+    sent_tokenize_list = sent_tokenize(total_text, language='spanish')
+    len(sent_tokenize_list)
+    print(len(sent_tokenize_list))
+
+
 def main():
     speeches = defaultdict(list)
-    pathlist = Path('data/').glob('**/*.txt')
+    pathlist = Path('data/fidel_speech/').glob('**/*.txt')
     for path in pathlist:
         if "esp" in str(path):
             year = str(path).split('/', 2)[1]
@@ -196,7 +209,9 @@ def main():
 
     generate_speeches_per_year(speeches)
 
-    most_common_words_per_year(speeches, 50)
+    tokanizer_speeches(speeches)
+
+    most_common_words_per_year(speeches, 20)
 
     generate_world_cloud(speeches)
 
