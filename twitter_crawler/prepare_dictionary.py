@@ -97,7 +97,7 @@ def keep_best_tokens(tweets_collection, tokens_frecuency, stop_words):
                 tokens.append(token)
         tweet['tokens'] = tokens
         tweets_collection_new.append(tweet)
-    tweets_collection_new
+    return tweets_collection_new
 
 # ---------------------------------------------------------
 #  Main
@@ -219,11 +219,11 @@ print(dictionary)
 print()
 
 # and save the dictionary for future use
-dictionary.save("../data/presidents/output.dic")
+dictionary.save("../data/presidents/all-presidents-dictionary.dic")
 
 # Build the corpus: vectors with occurence of each word for each document
 # and convert tokenized documents to vectors
-corpus = [dictionary.doc2bow(doc['tokens']) for doc in tokenized_documents]
+corpus = [dictionary.doc2bow(doc['tokens']) for doc in tweets_collection]
 
 # and save in Market Matrix format
-corpora.MmCorpus.serialize("../datapresidents/corpus.mz", corpus)
+corpora.MmCorpus.serialize("../data/presidents/all-presidents-corpus.mm", corpus)
