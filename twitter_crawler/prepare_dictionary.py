@@ -12,6 +12,7 @@ from collections import defaultdict
 from gensim import corpora
 from optparse import OptionParser
 from string import digits
+from gensim import corpora, models, similarities
 
 
 # Get the documents from the DB
@@ -227,3 +228,24 @@ corpus = [dictionary.doc2bow(doc['tokens']) for doc in tweets_collection]
 
 # and save in Market Matrix format
 corpora.MmCorpus.serialize("../data/presidents/all-presidents-corpus.mm", corpus)
+
+corpus_filename = '../data/presidents/all-presidents-corpus.mm'
+dict_filename   = '../data/presidents/all-presidents-dictionary.dic'
+lda_filename    = '../data/presidents/all-presidents-dictionary.lda'
+lda_params      = {'num_topics': 40, 'passes': 20, 'alpha': 0.001}
+
+# Connect and get the documents
+
+# Load the corpus and Dictionary
+corpus = corpora.MmCorpus(corpus_filename)
+dictionary = corpora.Dictionary.load(dict_filename)
+
+print("Running LDA with: %s  " % lda_params)
+lda = models.LdaModel(corpus, id2word=dictionary,
+                        num_topics=lda_params['num_topics'],
+                        passes=lda_params['passes'],
+                        alpha = lda_params['alpha'])
+print()
+lda.print_topics()
+lda.save(lda_filename)
+print("lda saved in %s " % lda_filename)
